@@ -18,24 +18,196 @@
   .dots span:nth-child(2){animation-delay:.2s}
   .dots span:nth-child(3){animation-delay:.4s}
   @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
-  main{display:flex;flex-direction:column;align-items:center;gap:28px}
-  pre.face{font:15px/1.25 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);
-           animation:bob 2.4s ease-in-out infinite;user-select:none}
-  @keyframes bob{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-4px) rotate(-2deg)}75%{transform:translateY(-4px) rotate(2deg)}}
-  @media (prefers-reduced-motion: reduce){ .dots span,pre.face{animation:none} }
+  main{display:flex;flex-direction:column;align-items:center;gap:28px;width:100%;min-width:0}
+  .screen{background:#151513;border-radius:22px;padding:14px;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 50px -20px rgba(0,0,0,.45)}
+  #doxie{display:block;width:min(78vw,400px);aspect-ratio:72/50}
+  .caption{font:13px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);letter-spacing:.08em}
+  @media (prefers-reduced-motion: reduce){ .dots span{animation:none} }
 </style>
 </head>
 <body>
   <main>
-    <h1>cool things are on the way<span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
-<pre class="face" aria-label="a little dachshund saying hee hee">
-                     __
- ~ \________________/ o\__
-    \                   __O
-     \_   _________   _/
-       |_|         |_|
-          hee hee!
-</pre>
+    <h1>cool things are on the <span style="white-space:nowrap">way<span class="dots"><span>.</span><span>.</span><span>.</span></span></span></h1>
+<div class="screen"><canvas id="doxie" role="img" aria-label="a dachshund head drawn in coloured text, bobbing and wagging its ears"></canvas></div>
+    <div class="caption">hee hee</div>
   </main>
+<script>
+// Shaded ASCII dachshund head. Ray-marches a few signed-distance shapes per
+// character cell, lights them, and picks a glyph by brightness.
+(function (root) {
+  const RAMP = " .,:;i1tfLCG08@";
+
+  const len3 = (x, y, z) => Math.sqrt(x * x + y * y + z * z);
+  const smin = (a, b, k) => {
+    const h = Math.max(k - Math.abs(a - b), 0) / k;
+    return Math.min(a, b) - h * h * k * 0.25;
+  };
+  // approximate ellipsoid distance
+  const ell = (x, y, z, rx, ry, rz) => {
+    const k0 = len3(x / rx, y / ry, z / rz);
+    const k1 = len3(x / (rx * rx), y / (ry * ry), z / (rz * rz));
+    return k0 * (k0 - 1) / (k1 || 1e-6);
+  };
+  const capsule = (x, y, z, ax, ay, az, bx, by, bz, r) => {
+    const px = x - ax, py = y - ay, pz = z - az;
+    const bax = bx - ax, bay = by - ay, baz = bz - az;
+    const h = Math.max(0, Math.min(1, (px * bax + py * bay + pz * baz) / (bax * bax + bay * bay + baz * baz)));
+    return len3(px - bax * h, py - bay * h, pz - baz * h) - r;
+  };
+
+  // material ids: 0 fur, 1 ear, 2 nose/eye, 3 tongue
+  function scene(x, y, z, st) {
+    // whole-head pose
+    y -= st.bob;
+    // yaw + tilt
+    let c = Math.cos(st.yaw), s = Math.sin(st.yaw);
+    let X = c * x - s * z, Z = s * x + c * z;
+    x = X; z = Z;
+    c = Math.cos(st.tilt); s = Math.sin(st.tilt);
+    let Y = c * y - s * x; X = s * y + c * x;
+    x = X; y = Y;
+
+    const skull = ell(x, y - 0.18, z + 0.05, 0.5, 0.46, 0.5);
+    const snout = capsule(x, y, z, 0, 0.0, 0.2, 0, -0.1, 1.05, 0.2);
+    const muzzleTop = capsule(x, y, z, 0, 0.2, 0.15, 0, 0.0, 1.0, 0.15);
+    let d = smin(skull, smin(snout, muzzleTop, 0.12), 0.25);
+    const neck = capsule(x, y, z, 0, -0.1, -0.2, 0, -0.75, -0.4, 0.28);
+    d = smin(d, neck, 0.2);
+    let m = 0;
+
+    // brows bump
+    const brow = Math.min(
+      ell(x - 0.2, y - 0.35, z - 0.33, 0.13, 0.08, 0.1),
+      ell(x + 0.2, y - 0.35, z - 0.33, 0.13, 0.08, 0.1));
+    d = smin(d, brow, 0.08);
+
+    // ears: hang from sides, pivot near the top, wag around z and x
+    for (const side of [-1, 1]) {
+      const ang = st.ear * side + 0.18 * side;
+      let ex = x - side * 0.52, ey = y - 0.36, ez = z + 0.0;
+      const ca = Math.cos(ang), sa = Math.sin(ang);
+      const rx = ca * ex - sa * ey, ry = sa * ex + ca * ey;
+      const flap = st.flap * side;
+      const cf = Math.cos(flap), sf = Math.sin(flap);
+      const ry2 = cf * ry - sf * ez, rz2 = sf * ry + cf * ez;
+      const ear = ell(rx, ry2 + 0.55, rz2, 0.11, 0.62, 0.28);
+      if (ear < d) { d = ear; m = 1; }
+    }
+
+    // nose
+    const nose = ell(x, y + 0.04, z - 1.24, 0.12, 0.1, 0.08);
+    if (nose < d) { d = nose; m = 2; }
+    // eyes
+    const eye = Math.min(len3(x - 0.28, y - 0.3, z - 0.36), len3(x + 0.28, y - 0.3, z - 0.36)) - 0.075;
+    if (eye < d) { d = eye; m = 2; }
+    // tongue peeking out
+    const tongue = ell(x, y + 0.3, z - 0.9, 0.08, 0.04, 0.14);
+    if (tongue < d) { d = tongue; m = 3; }
+    return [d, m];
+  }
+
+  const PAL = [
+    [226, 152, 80],  // fur: warm tan
+    [96, 50, 24],    // ears: dark brown
+    [28, 22, 20],    // nose / eyes
+    [232, 110, 120], // tongue
+  ];
+
+  function render(cols, rows, t, cellAspect) {
+    const st = {
+      bob: Math.sin(t * 2.2) * 0.09,
+      yaw: -0.8 + Math.sin(t * 0.7) * 0.1,
+      tilt: Math.sin(t * 1.1) * 0.08,
+      ear: Math.sin(t * 6.0) * 0.32,
+      flap: Math.sin(t * 6.0 + 1.2) * 0.25,
+    };
+    const lx = -0.5, ly = 0.7, lz = 0.6, ll = len3(lx, ly, lz);
+    const out = new Array(rows * cols);
+    const camZ = 4.2, fov = 0.2;
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const u = ((i + 0.5) / cols * 2 - 1) * fov * cols / rows * cellAspect;
+        const v = -((j + 0.5) / rows * 2 - 1) * fov;
+        let dx = u, dy = v, dz = -1;
+        const dl = len3(dx, dy, dz); dx /= dl; dy /= dl; dz /= dl;
+        let ox = -0.2, oy = -0.1, oz = camZ, tt = 0, hit = -1, mat = 0;
+        // skip rays that miss a sphere around the head
+        const cx = ox, cy = oy + 0.1, cz = oz - 0.2;
+        const bdot = cx * dx + cy * dy + cz * dz;
+        if (bdot * bdot - (cx * cx + cy * cy + cz * cz - 2.1) < 0) { out[j * cols + i] = null; continue; }
+        for (let k = 0; k < 60; k++) {
+          const px = ox + dx * tt, py = oy + dy * tt, pz = oz + dz * tt;
+          const [d, m] = scene(px, py, pz, st);
+          if (d < 0.004) { hit = tt; mat = m; break; }
+          tt += d * 0.9;
+          if (tt > 7) break;
+        }
+        if (hit < 0) { out[j * cols + i] = null; continue; }
+        const px = ox + dx * hit, py = oy + dy * hit, pz = oz + dz * hit, e = 0.004;
+        const nx = scene(px + e, py, pz, st)[0] - scene(px - e, py, pz, st)[0];
+        const ny = scene(px, py + e, pz, st)[0] - scene(px, py - e, pz, st)[0];
+        const nz = scene(px, py, pz + e, st)[0] - scene(px, py, pz - e, st)[0];
+        const nl = len3(nx, ny, nz) || 1;
+        const ndl = Math.max(0, (nx * lx + ny * ly + nz * lz) / (nl * ll));
+        const rim = Math.pow(1 - Math.max(0, nz / nl), 3) * 0.25;
+        const spec = Math.pow(Math.max(0, ((nx / nl) * 0.3 + (ny / nl) * 0.5 + (nz / nl) * 0.8)), 24) * (mat === 2 ? 0.9 : 0.25);
+        const b = Math.min(1, 0.28 + 0.72 * ndl + rim + spec);
+        const p = PAL[mat];
+        const lit = 0.45 + 0.8 * b;
+        out[j * cols + i] = {
+          ch: RAMP[Math.min(RAMP.length - 1, 1 + Math.floor(b * (RAMP.length - 1)))],
+          r: Math.min(255, p[0] * lit + spec * 255) | 0,
+          g: Math.min(255, p[1] * lit + spec * 255) | 0,
+          b: Math.min(255, p[2] * lit + spec * 255) | 0,
+        };
+      }
+    }
+    return out;
+  }
+
+  root.Doxie = { render };
+})(typeof window !== "undefined" ? window : globalThis);
+
+(function () {
+  const COLS = 72, ROWS = 50;
+  const canvas = document.getElementById("doxie");
+  const ctx = canvas.getContext("2d");
+  let cw = 0, ch = 0, fontPx = 0;
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(w * ROWS / COLS * dpr);
+    ch = canvas.height / ROWS;
+    fontPx = ch * 0.95;
+    ctx.font = "600 " + fontPx + "px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    cw = canvas.width / COLS;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "center";
+  }
+  function draw(t) {
+    const cells = Doxie.render(COLS, ROWS, t, cw / ch);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let j = 0; j < ROWS; j++) {
+      for (let i = 0; i < COLS; i++) {
+        const c = cells[j * COLS + i];
+        if (!c || c.ch === " ") continue;
+        ctx.fillStyle = "rgb(" + c.r + "," + c.g + "," + c.b + ")";
+        ctx.fillText(c.ch, (i + 0.5) * cw, j * ch);
+      }
+    }
+  }
+  resize();
+  window.addEventListener("resize", resize);
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (still) { draw(0.6); return; }
+  let last = 0;
+  function loop(now) {
+    if (now - last > 33) { draw(now / 1000); last = now; }  // ~30 fps
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
 </body>
 </html>
