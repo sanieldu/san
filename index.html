@@ -18,10 +18,26 @@
   .dots span:nth-child(2){animation-delay:.2s}
   .dots span:nth-child(3){animation-delay:.4s}
   @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
-  @media (prefers-reduced-motion: reduce){ .dots span{animation:none} }
+  main{display:flex;flex-direction:column;align-items:center;gap:28px}
+  pre.face{font:15px/1.25 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);
+           animation:bob 2.4s ease-in-out infinite;user-select:none}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-4px) rotate(-2deg)}75%{transform:translateY(-4px) rotate(2deg)}}
+  @media (prefers-reduced-motion: reduce){ .dots span,pre.face{animation:none} }
 </style>
 </head>
 <body>
-  <h1>cool things are on the way<span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
+  <main>
+    <h1>cool things are on the way<span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
+<pre class="face" aria-label="a giggling face saying hee hee">
+      .-""""""-.
+    .'          '.
+   /   ^      ^   \
+  |  ''   __   ''  |
+   \     \__/     /
+    '.          .'
+      '-......-'
+       hee hee!
+</pre>
+  </main>
 </body>
 </html>
