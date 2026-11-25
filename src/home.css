@@ -1,0 +1,55 @@
+/* ---------- revealed home ---------- */
+.home-page .site-header nav { display: none; } /* the notes are the nav here */
+.home { display: flex; flex-direction: column; padding-top: clamp(40px, 8vw, 96px); }
+.home-grid {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-areas: "name name" "lede figure" "nav figure"; gap: 0 48px; align-items: start;
+}
+.name { grid-area: name; font-size: var(--step-7); letter-spacing: -0.035em; line-height: 0.95; margin-left: -0.04em; }
+.home .lede { grid-area: lede; margin-top: 28px; color: var(--muted); }
+.note-nav { grid-area: nav; margin-top: clamp(40px, 6vw, 72px); border-top: 1px solid var(--border); max-width: 30rem; }
+.note-nav a { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border);
+  font: 400 var(--step-2)/1.2 var(--serif); letter-spacing: -0.01em; color: var(--text); transition: color 150ms, padding 200ms; }
+.note-nav a:hover { color: var(--gold-hi); padding-left: 8px; }
+.glyph, .note { display: inline-block; width: 18px; height: 24px; flex: none; background: var(--gold);
+  mask: url("/note.svg") center / contain no-repeat; -webkit-mask: url("/note.svg") center / contain no-repeat; }
+.note-nav a:hover .glyph { background: var(--gold-hi); }
+
+.home-figure { grid-area: figure; justify-self: end; align-self: end; position: relative; height: clamp(200px, 30vw, 300px); aspect-ratio: 200 / 320; margin-right: 6%; }
+.home-figure::after { /* a short stage line under his feet */
+  content: ""; position: absolute; left: -30%; right: -30%; bottom: 2%; height: 1px; background: linear-gradient(90deg, transparent, var(--border) 20% 80%, transparent); }
+.trumpeter { display: block; width: 100%; height: 100%; color: #F4F2EE; overflow: visible; }
+.trumpeter path, .trumpeter circle, .trumpeter ellipse { fill: currentColor; stroke: currentColor; }
+.trumpeter [fill="none"] { fill: none; }
+.trumpeter .bell { stroke: none; }
+.trumpeter .back { color: #CFCCC5; }
+
+.home-controls { display: flex; gap: 10px; margin-top: 56px; font-size: var(--step--1); color: var(--muted); }
+.home-controls button { font: inherit; color: var(--muted); background: none; border: 0; cursor: pointer; padding: 0; }
+.home-controls button:hover { color: var(--gold-hi); }
+
+@media (max-width: 640px) {
+  .home-grid { grid-template-columns: minmax(0, 1fr) 96px; gap: 0 16px; }
+  .home-figure { height: 168px; margin-right: 0; }
+  .note-nav a { font-size: var(--step-1); }
+  .home .lede { font-size: 1.15rem; }
+  .intro .stage-figure { height: min(38vh, 300px); }
+}
+
+/* ---------- intro (first visit) ---------- */
+.intro-on .reveal-in, .intro-on .note-nav .glyph, .intro-on .note-nav .txt, .intro-on .site-header { opacity: 0; }
+.intro { position: fixed; inset: 0; z-index: 100; background: var(--black); overflow: hidden; }
+.intro .spot { position: absolute; left: 50%; bottom: 14vh; width: min(110vw, 900px); height: 85vh; translate: -50% 0; opacity: 0; pointer-events: none;
+  background: radial-gradient(ellipse 38% 100% at 50% 100%, rgba(255, 250, 235, 0.13), transparent 70%); }
+.intro .floor { position: absolute; left: 50%; bottom: calc(14vh - 26px); width: min(80vw, 560px); height: 52px; translate: -50% 0; opacity: 0;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 250, 235, 0.16), transparent 70%); }
+.stage-figure { position: absolute; left: 50%; bottom: 14vh; height: min(44vh, 340px); aspect-ratio: 200 / 320; } /* centred by GSAP (xPercent) */
+.click-me, .skip { font: 400 var(--step--1)/1 var(--sans); letter-spacing: 0.08em; color: var(--muted); background: none; border: 0; cursor: pointer; }
+.click-me { position: absolute; left: 50%; bottom: calc(14vh - 64px); translate: -50% 0; padding: 12px 18px; color: var(--text); animation: pulse 1.8s ease-in-out infinite; }
+.click-me:hover, .click-me:focus-visible { color: var(--gold-hi); }
+@keyframes pulse { 50% { opacity: 0.45; } }
+.skip { position: absolute; top: 20px; right: var(--gutter); padding: 8px; }
+.skip:hover { color: var(--text); }
+.notes { position: fixed; inset: 0; z-index: 101; pointer-events: none; }
+.notes .note { position: absolute; left: 0; top: 0; }
+.intro-on .doxie { visibility: hidden; }

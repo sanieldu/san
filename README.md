@@ -1,5 +1,27 @@
-# san
-this is my first ever repo, I have no clue what I am doing I am just trying to learn how to navigate GitHub. I don't even know what a Git is lol. One day I will look back at this and be like wow, or maybe one day I'll still be just as confused. 
+# heydsu.com
 
+Daniel Su's personal site. Vite + plain JavaScript; every page is a plain HTML file.
 
-This repo is specifically going to be used to help me organize/plan how I will create my personal portfolio website. 
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # output in dist/ (Vercel runs this automatically)
+npm test         # checks the Cool Stuff front-matter parser
+```
+
+## Where things go
+
+| What | Where |
+|---|---|
+| Trumpet lick for the intro | `public/audio/lick.mp3` (the current file is a synthesized placeholder) |
+| Resume PDF | `public/resume.pdf` (the current file is a placeholder page) |
+| A Cool Stuff post | a new `.md` file in `content/cool/` (see `how-to-add-a-post.md`) |
+| Post cover images | `public/cool/`, referenced as `/cool/name.jpg` |
+| Shared header / footer / meta tags | `partials/` |
+| The intro's reveal ("notes become the menu") | `src/reveal.js`, swappable on its own |
+
+To show the intro again to everyone (e.g. after changing the lick), bump `FLAG` in `src/home.js`
+and the matching key in the inline script in `index.html`.
+
+Search engines are blocked (`noindex` in `partials/head.html` and an `X-Robots-Tag` header in `vercel.json`)
+until launch.
