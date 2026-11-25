@@ -3,3 +3,14 @@ this is my first ever repo, I have no clue what I am doing I am just trying to l
 
 
 This repo is specifically going to be used to help me organize/plan how I will create my personal portfolio website. 
+
+## Running the site
+
+The pages are plain HTML (`index.html`, `resume.html`, `projects.html`, `journal.html`); the 3D drum kit,
+stage haze and glass nav are React pieces in `src/`.
+
+```bash
+npm install
+npm run dev      # local preview at http://localhost:5173
+npm run build    # the finished site goes to dist/ — that folder is what gets hosted
+```

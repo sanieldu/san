@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,39 +22,21 @@
     <a href="#contact">Contact</a>
   </nav>
 </header>
-<main>
-<section class="stage">
-  <div class="count" aria-hidden="true"><span>5</span><span>6</span><span>7</span><span>8</span></div>
+<main class="home">
+<section class="hero">
   <p class="kicker">Tempo ♩ = 400 · Double-time swing</p>
-  <h1>Hey,<br>I'm Daniel.</h1>
-  <p class="lede">Welcome in, and thanks for stopping by. Pull up a chair. This is where I keep my résumé,
-    the things I'm building, and a journal I write every week.</p>
-  <div class="buttons">
-    <a class="btn solid" href="projects.html">See what I'm building</a>
-    <a class="btn" href="resume.html">Read the résumé</a>
-    <a class="btn" href="journal.html">This week's journal</a>
+  <h1>Hey, I'm<br>Daniel.</h1>
+  <div id="kit"></div>
+  <div class="hero-copy">
+    <p class="lede">Welcome in, and thanks for stopping by. Pull up a chair. This is where I keep my résumé,
+      the things I'm building, and a journal I write every week.</p>
+    <div class="buttons">
+      <a class="btn solid" href="projects.html">See what I'm building</a>
+      <a class="btn" href="resume.html">Read the résumé</a>
+      <a class="btn" href="journal.html">This week's journal</a>
+    </div>
+    <p class="hint">Tap the kit. It plays.</p>
   </div>
-  <svg class="kit" viewBox="0 0 600 360" role="img" aria-label="A drum kit standing in a single spotlight">
-    <defs>
-      <linearGradient id="brass" x1="0" x2="1"><stop offset="0" stop-color="#5e3f15"/><stop offset=".5" stop-color="#f2c230"/><stop offset="1" stop-color="#5e3f15"/></linearGradient>
-      <radialGradient id="pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f2c230" stop-opacity=".35"/><stop offset="1" stop-color="#f2c230" stop-opacity="0"/></radialGradient>
-    </defs>
-    <ellipse cx="300" cy="348" rx="290" ry="22" fill="url(#pool)"/>
-    <g stroke="#6b5640" stroke-width="3" fill="none">
-      <path d="M85 150V348M60 348l25-30 25 30"/><path d="M205 95l20 253M200 348l25-30 25 30"/>
-      <path d="M470 110l30 238M475 348l25-30 25 30"/><path d="M175 262l-30 86M175 262l30 86"/><path d="M380 300l-8 48M480 300l8 48"/>
-    </g>
-    <g fill="url(#brass)" stroke="#2a1a0c"><ellipse cx="85" cy="150" rx="50" ry="7"/><ellipse cx="85" cy="158" rx="50" ry="7"/>
-      <ellipse cx="205" cy="95" rx="62" ry="9" transform="rotate(-8 205 95)"/><ellipse cx="470" cy="110" rx="72" ry="10" transform="rotate(8 470 110)"/></g>
-    <g fill="#1d140c" stroke="#e8a93a" stroke-width="2">
-      <path d="M120 225v37a55 13 0 0 0 110 0v-37"/><ellipse cx="175" cy="225" rx="55" ry="13" fill="#3a2a1a"/>
-      <path d="M372 215v85a58 14 0 0 0 116 0v-85"/><ellipse cx="430" cy="215" rx="58" ry="14" fill="#3a2a1a"/>
-      <path d="M255 150v42a45 12 0 0 0 90 0v-42"/><ellipse cx="300" cy="150" rx="45" ry="12" fill="#3a2a1a"/>
-      <circle cx="300" cy="270" r="78" stroke-width="6"/>
-    </g>
-    <text x="300" y="285" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="44" fill="#f2c230">dsu</text>
-    <path d="M140 210l80 22M150 228l75-26" stroke="#d9c9a8" stroke-width="3" stroke-linecap="round"/>
-  </svg>
 </section>
 </main>
 
@@ -69,5 +51,6 @@
   </div>
   <small>© 2026 dsu · played at tempo</small>
 </footer>
+<script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
